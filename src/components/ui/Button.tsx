@@ -39,7 +39,7 @@ export function ButtonLink({
       href={href}
       onClick={onClick}
       className={clsx(
-        "focus-ring group inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-300",
+        "focus-ring group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium transition-all duration-300",
         VARIANT_STYLES[variant],
         SIZE_STYLES[size],
         className,

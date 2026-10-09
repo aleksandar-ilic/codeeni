@@ -1,10 +1,10 @@
 "use client";
 
 import { motion, type Variants } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/Button";
-import { CONTACT_ANCHOR } from "@/lib/navigation";
+import { START_PROJECT_HREF } from "@/lib/navigation";
 import { HeroVisual } from "./hero/HeroVisual";
 
 const container: Variants = {
@@ -16,8 +16,6 @@ const item: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
 };
-
-const TRUST_POINTS = ["Full-stack engineering", "Cloud-native architecture", "Production-ready templates"];
 
 export function Hero() {
   return (
@@ -52,7 +50,7 @@ export function Hero() {
           </motion.p>
 
           <motion.div variants={item} className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <ButtonLink href={CONTACT_ANCHOR} size="lg">
+            <ButtonLink href={START_PROJECT_HREF} size="lg">
               Let&apos;s Build Together
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </ButtonLink>
@@ -61,17 +59,20 @@ export function Hero() {
             </ButtonLink>
           </motion.div>
 
-          <motion.ul
+          <motion.aside
             variants={item}
-            className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink-300"
+            aria-label="Our guarantee"
+            className="glass mt-10 inline-flex items-center gap-4 rounded-2xl px-5 py-4"
           >
-            {TRUST_POINTS.map((point) => (
-              <li key={point} className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-brand-gradient" />
-                {point}
-              </li>
-            ))}
-          </motion.ul>
+            <ShieldCheck className="h-7 w-7 shrink-0 text-accent-300" strokeWidth={1.75} />
+            <div>
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-accent-300">Guarantee</p>
+              <p className="mt-1 text-sm text-ink-200 sm:text-base">
+                A <strong className="font-semibold text-white">fixed price</strong>, agreed before we write a line of
+                code. No surprises on the invoice.
+              </p>
+            </div>
+          </motion.aside>
         </motion.div>
 
         <HeroVisual />

@@ -8,7 +8,7 @@ import clsx from "clsx";
 
 import { Logo } from "@/components/ui/Logo";
 import { ButtonLink } from "@/components/ui/Button";
-import { CONTACT_ANCHOR, NAV_LINKS } from "@/lib/navigation";
+import { NAV_LINKS, START_PROJECT_HREF } from "@/lib/navigation";
 
 const SCROLL_THRESHOLD = 24;
 
@@ -48,7 +48,7 @@ export function Navbar() {
         <DesktopLinks />
 
         <div className="hidden md:block">
-          <ButtonLink href={CONTACT_ANCHOR} size="sm">
+          <ButtonLink href={START_PROJECT_HREF} size="sm">
             Start a Project
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </ButtonLink>
@@ -111,7 +111,7 @@ function MobileMenu({ onNavigate }: { onNavigate: () => void }) {
           </li>
         ))}
         <li className="pt-2">
-          <ButtonLink href={CONTACT_ANCHOR} onClick={onNavigate} className="w-full">
+          <ButtonLink href={START_PROJECT_HREF} onClick={onNavigate} className="w-full">
             Start a Project
             <ArrowRight className="h-4 w-4" />
           </ButtonLink>
