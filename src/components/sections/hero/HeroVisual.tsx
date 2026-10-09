@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { Activity, CheckCircle2, Rocket, type LucideIcon } from "lucide-react";
 import clsx from "clsx";
 
+import { useI18n } from "@/i18n/I18nProvider";
+
 type NetworkNode = { id: string; x: number; y: number; r: number };
 
 const NODES: readonly NetworkNode[] = [
@@ -41,13 +43,16 @@ const CODE_LINES: readonly CodeToken[][] = [
 const TONE_STYLES: Record<NonNullable<CodeToken["tone"]>, string> = {
   keyword: "text-accent-300",
   fn: "text-brand-300",
-  string: "text-emerald-300",
-  prop: "text-sky-200",
+  string: "text-success",
+  prop: "text-brand-200",
   muted: "text-ink-300",
-  success: "text-emerald-400/90",
+  success: "text-success/90",
 };
 
 export function HeroVisual() {
+  const { t } = useI18n();
+  const { visual } = t.hero;
+
   return (
     <div className="relative mx-auto aspect-square w-full max-w-[520px]">
       <div
@@ -55,18 +60,18 @@ export function HeroVisual() {
         className="absolute inset-8 rounded-full bg-brand-gradient opacity-25 blur-3xl"
       />
       <NetworkBackdrop />
-      <CodeWindow />
+      <CodeWindow label={visual.codeAria} />
 
       <StatusChip
         icon={Activity}
-        label="Uptime"
+        label={visual.uptime}
         value="99.99%"
         className="left-0 top-[12%] sm:-left-4"
         delay={1.1}
       />
       <StatusChip
         icon={Rocket}
-        label="Deploy"
+        label={visual.deploy}
         value="42s"
         className="right-0 top-[4%] sm:-right-2"
         delay={1.3}
@@ -74,7 +79,7 @@ export function HeroVisual() {
       />
       <StatusChip
         icon={CheckCircle2}
-        label="Tests"
+        label={visual.tests}
         value="248 / 248"
         className="bottom-[8%] right-2 sm:-right-4"
         delay={1.5}
@@ -142,7 +147,7 @@ function NetworkBackdrop() {
   );
 }
 
-function CodeWindow() {
+function CodeWindow({ label }: { label: string }) {
   return (
     <div className="absolute inset-0 flex items-center px-4 sm:px-10">
       <motion.figure
@@ -150,7 +155,7 @@ function CodeWindow() {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="glass w-full overflow-hidden rounded-2xl bg-ink-900/60"
-        aria-label="Code sample illustrating a Codeeni build"
+        aria-label={label}
       >
         <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
           <span className="h-2.5 w-2.5 rounded-full bg-rose-400/80" />

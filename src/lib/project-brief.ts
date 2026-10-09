@@ -1,5 +1,8 @@
-export const PROJECT_TYPES = ["Website", "Online store", "Web app / system", "Something else"] as const;
-export const TIMELINES = ["As soon as possible", "In the next 1–2 months", "Just exploring"] as const;
+export const PROJECT_TYPES = ["website", "store", "app", "other"] as const;
+export const TIMELINES = ["asap", "soon", "exploring"] as const;
+
+export type ProjectType = (typeof PROJECT_TYPES)[number];
+export type Timeline = (typeof TIMELINES)[number];
 
 export type BriefField =
   | "name"
@@ -14,8 +17,18 @@ export type BriefField =
   | "phone"
   | "email";
 
+export type BriefErrorCode =
+  | "nameRequired"
+  | "businessRequired"
+  | "projectTypeRequired"
+  | "descriptionTooShort"
+  | "timelineInvalid"
+  | "contactRequired"
+  | "phoneInvalid"
+  | "emailInvalid";
+
 export type BriefValues = Record<BriefField, string>;
-export type BriefErrors = Partial<Record<BriefField, string>>;
+export type BriefErrors = Partial<Record<BriefField, BriefErrorCode>>;
 
 export const BRIEF_STEPS: readonly (readonly BriefField[])[] = [
   ["name", "business"],
@@ -54,23 +67,21 @@ export function validateBriefStep(step: number, rawValues: BriefValues): BriefEr
 
   switch (step) {
     case 0:
-      if (!values.name) errors.name = "Please tell us your name.";
-      if (!values.business) errors.business = "Tell us what your business does.";
+      if (!values.name) errors.name = "nameRequired";
+      if (!values.business) errors.business = "businessRequired";
       break;
     case 1:
-      if (!isOneOf(PROJECT_TYPES, values.projectType)) errors.projectType = "Pick the option closest to your project.";
-      if (values.description.length < MIN_DESCRIPTION_LENGTH) {
-        errors.description = `A few more words, please (at least ${MIN_DESCRIPTION_LENGTH} characters).`;
-      }
-      if (values.timeline && !isOneOf(TIMELINES, values.timeline)) errors.timeline = "Pick one of the options.";
+      if (!isOneOf(PROJECT_TYPES, values.projectType)) errors.projectType = "projectTypeRequired";
+      if (values.description.length < MIN_DESCRIPTION_LENGTH) errors.description = "descriptionTooShort";
+      if (values.timeline && !isOneOf(TIMELINES, values.timeline)) errors.timeline = "timelineInvalid";
       break;
     case 3:
       if (!values.phone && !values.email) {
-        errors.phone = "Leave a phone number or an email so we can reach you.";
+        errors.phone = "contactRequired";
         break;
       }
-      if (values.phone && !PHONE_PATTERN.test(values.phone)) errors.phone = "Please enter a valid phone number.";
-      if (values.email && !EMAIL_PATTERN.test(values.email)) errors.email = "Please enter a valid email address.";
+      if (values.phone && !PHONE_PATTERN.test(values.phone)) errors.phone = "phoneInvalid";
+      if (values.email && !EMAIL_PATTERN.test(values.email)) errors.email = "emailInvalid";
       break;
   }
 

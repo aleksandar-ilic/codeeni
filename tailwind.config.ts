@@ -1,11 +1,24 @@
 import type { Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
+
+const SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
+
+/** Maps a color scale to the `--{name}-{shade}` RGB variables defined per theme in globals.css. */
+function themeScale(name: string) {
+  return Object.fromEntries(SHADES.map((shade) => [shade, `rgb(var(--${name}-${shade}) / <alpha-value>)`]));
+}
+
+function themeColor(name: string) {
+  return `rgb(var(--${name}) / <alpha-value>)`;
+}
 
 /**
- * Codeeni design tokens.
- * - `ink`:    deep navy surfaces used for backgrounds and cards.
+ * Codeeni design tokens. Values live in globals.css so the light theme can swap them.
+ * - `ink`:    deep navy surfaces and text.
  * - `brand`:  tech blue, primary interactive color.
  * - `accent`: vibrant purple, used for highlights and gradients.
- * Change these scales to re-theme the whole site.
+ * - `white`:  "high-contrast foreground"; it turns dark in the light theme.
+ * - `on-brand`: always-white text for use on the brand gradient.
  */
 const config: Config = {
   content: ["./src/**/*.{ts,tsx,mdx}"],
@@ -17,45 +30,13 @@ const config: Config = {
     },
     extend: {
       colors: {
-        ink: {
-          50: "#eef1fb",
-          100: "#d5dbf2",
-          200: "#aab5e0",
-          300: "#7a89c4",
-          400: "#4f5f9e",
-          500: "#2f3d78",
-          600: "#1f2a5c",
-          700: "#151d45",
-          800: "#0d1330",
-          900: "#080c22",
-          950: "#04061a",
-        },
-        brand: {
-          50: "#eef5ff",
-          100: "#d9e8ff",
-          200: "#bcd7ff",
-          300: "#8ebdff",
-          400: "#5998ff",
-          500: "#3374ff",
-          600: "#1b53f5",
-          700: "#143fe1",
-          800: "#1734b6",
-          900: "#19318f",
-          950: "#142057",
-        },
-        accent: {
-          50: "#f6f3ff",
-          100: "#ede8ff",
-          200: "#ddd4ff",
-          300: "#c4b1ff",
-          400: "#a685ff",
-          500: "#8b55fb",
-          600: "#7c33f2",
-          700: "#6d21de",
-          800: "#5b1bba",
-          900: "#4b1898",
-          950: "#2e0c67",
-        },
+        ink: themeScale("ink"),
+        brand: themeScale("brand"),
+        accent: themeScale("accent"),
+        white: themeColor("white"),
+        "on-brand": "#ffffff",
+        danger: themeColor("danger"),
+        success: themeColor("success"),
       },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
@@ -67,7 +48,7 @@ const config: Config = {
         "brand-gradient-soft":
           "linear-gradient(135deg, rgba(51,116,255,0.15) 0%, rgba(139,85,251,0.15) 100%)",
         "grid-faint":
-          "linear-gradient(to right, rgba(170,181,224,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(170,181,224,0.06) 1px, transparent 1px)",
+          "linear-gradient(to right, rgb(var(--grid-line)) 1px, transparent 1px), linear-gradient(to bottom, rgb(var(--grid-line)) 1px, transparent 1px)",
       },
       backgroundSize: {
         grid: "48px 48px",
@@ -75,7 +56,7 @@ const config: Config = {
       boxShadow: {
         glow: "0 0 40px -8px rgba(139,85,251,0.55)",
         "glow-brand": "0 0 40px -8px rgba(51,116,255,0.6)",
-        glass: "inset 0 1px 0 0 rgba(255,255,255,0.06), 0 8px 32px -12px rgba(4,6,26,0.6)",
+        glass: "var(--shadow-glass)",
       },
       keyframes: {
         "pulse-soft": {
@@ -97,7 +78,11 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(({ addVariant }) => {
+      addVariant("light", ".light &");
+    }),
+  ],
 };
 
 export default config;

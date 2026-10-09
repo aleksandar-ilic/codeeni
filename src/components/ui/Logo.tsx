@@ -77,21 +77,22 @@ export function LogoMark({ className, size = "md", glow = true }: LogoMarkProps)
 type LogoProps = {
   className?: string;
   showWordmark?: boolean;
-  showTagline?: boolean;
+  /** When set, renders the stacked lockup with the tagline under the wordmark. */
+  tagline?: string;
 };
 
 const WORDMARK = "CODEENI";
 const WORDMARK_GRADIENT =
   "bg-gradient-to-r from-brand-400 via-accent-400 to-fuchsia-400 bg-clip-text font-display font-bold text-transparent";
 
-export function Logo({ className, showWordmark = true, showTagline = false }: LogoProps) {
-  const hasLockup = showWordmark && showTagline;
+export function Logo({ className, showWordmark = true, tagline }: LogoProps) {
+  const hasLockup = showWordmark && Boolean(tagline);
 
   return (
     <span className={clsx("inline-flex items-center", hasLockup ? "gap-3" : "gap-2.5", className)}>
       <LogoMark size={hasLockup ? "lg" : "md"} />
-      {hasLockup && <WordmarkWithTagline />}
-      {showWordmark && !showTagline && (
+      {hasLockup && tagline && <WordmarkWithTagline tagline={tagline} />}
+      {showWordmark && !hasLockup && (
         <span className={clsx(WORDMARK_GRADIENT, "text-2xl tracking-wide")}>{WORDMARK}</span>
       )}
     </span>
@@ -99,7 +100,7 @@ export function Logo({ className, showWordmark = true, showTagline = false }: Lo
 }
 
 /** The tagline sets the column width; the wordmark letters spread to match it exactly. */
-function WordmarkWithTagline() {
+function WordmarkWithTagline({ tagline }: { tagline: string }) {
   return (
     <span className="inline-grid gap-1.5 leading-none">
       <span className={clsx(WORDMARK_GRADIENT, "flex justify-between text-[36px]")}>
@@ -107,7 +108,7 @@ function WordmarkWithTagline() {
           <span key={index}>{letter}</span>
         ))}
       </span>
-      <span className="whitespace-nowrap text-[10px] font-medium text-ink-100">{SITE.tagline}</span>
+      <span className="whitespace-nowrap text-[10px] font-medium text-ink-100">{tagline}</span>
     </span>
   );
 }

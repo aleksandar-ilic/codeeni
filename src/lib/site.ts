@@ -1,8 +1,6 @@
 export const SITE = {
   name: "Codeeni",
-  tagline: "Where Logic Meets Effortless Execution",
   email: "hello@codeeni.com",
-  responseTime: "Within one business day",
 } as const;
 
 export type SocialPlatform = "github" | "linkedin" | "x";

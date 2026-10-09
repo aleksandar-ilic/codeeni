@@ -1,11 +1,12 @@
 "use server";
 
 export type ContactField = "name" | "email" | "details";
+export type ContactErrorCode = "nameRequired" | "emailInvalid" | "detailsTooShort";
 
 export type ContactFormState = {
   status: "idle" | "success" | "error";
-  message?: string;
-  fieldErrors?: Partial<Record<ContactField, string>>;
+  name?: string;
+  fieldErrors?: Partial<Record<ContactField, ContactErrorCode>>;
   values?: Partial<Record<ContactField, string>>;
 };
 
@@ -18,13 +19,11 @@ function readField(formData: FormData, field: ContactField) {
 }
 
 function validate(values: Record<ContactField, string>) {
-  const errors: Partial<Record<ContactField, string>> = {};
+  const errors: Partial<Record<ContactField, ContactErrorCode>> = {};
 
-  if (!values.name) errors.name = "Please tell us your name.";
-  if (!EMAIL_PATTERN.test(values.email)) errors.email = "Please enter a valid email address.";
-  if (values.details.length < MIN_DETAILS_LENGTH) {
-    errors.details = `Share a bit more about your project (at least ${MIN_DETAILS_LENGTH} characters).`;
-  }
+  if (!values.name) errors.name = "nameRequired";
+  if (!EMAIL_PATTERN.test(values.email)) errors.email = "emailInvalid";
+  if (values.details.length < MIN_DETAILS_LENGTH) errors.details = "detailsTooShort";
 
   return errors;
 }
@@ -41,14 +40,11 @@ export async function submitContact(
 
   const fieldErrors = validate(values);
   if (Object.keys(fieldErrors).length > 0) {
-    return { status: "error", message: "Please fix the highlighted fields.", fieldErrors, values };
+    return { status: "error", fieldErrors, values };
   }
 
   // Not delivered anywhere yet: connect an email or CRM provider (e.g. Resend, HubSpot) here.
   console.info("[contact] New project inquiry", { name: values.name, email: values.email });
 
-  return {
-    status: "success",
-    message: `Thanks, ${values.name}! We'll get back to you shortly.`,
-  };
+  return { status: "success", name: values.name };
 }

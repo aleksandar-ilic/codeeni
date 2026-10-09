@@ -15,7 +15,7 @@ type ButtonLinkProps = {
 
 const VARIANT_STYLES: Record<ButtonVariant, string> = {
   primary:
-    "bg-brand-gradient text-white shadow-glow hover:shadow-[0_0_56px_-6px_rgba(139,85,251,0.7)] hover:brightness-110",
+    "bg-brand-gradient text-on-brand shadow-glow hover:shadow-[0_0_56px_-6px_rgba(139,85,251,0.7)] hover:brightness-110",
   secondary: "glass text-ink-50 hover:border-white/20 hover:bg-white/[0.08]",
   ghost: "text-ink-100 hover:bg-white/5 hover:text-white",
 };

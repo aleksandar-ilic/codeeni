@@ -87,7 +87,7 @@ function TerminalMock({ lines }: { lines: string[] }) {
           className={clsx(
             "truncate",
             line.startsWith("$") && "text-brand-300",
-            line.startsWith("✓") && "text-emerald-300",
+            line.startsWith("✓") && "text-success",
             !line.startsWith("$") && !line.startsWith("✓") && "text-ink-200",
           )}
         >

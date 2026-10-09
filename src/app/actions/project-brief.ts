@@ -11,7 +11,6 @@ import {
 
 export type ProjectBriefState = {
   status: "idle" | "success" | "error";
-  message?: string;
   fieldErrors?: BriefErrors;
 };
 
@@ -34,7 +33,7 @@ export async function submitProjectBrief(
   );
 
   if (Object.keys(fieldErrors).length > 0) {
-    return { status: "error", message: "Some answers need another look.", fieldErrors };
+    return { status: "error", fieldErrors };
   }
 
   // Not delivered anywhere yet: connect an email or CRM provider (e.g. Resend, HubSpot) here.

@@ -6,30 +6,34 @@ import clsx from "clsx";
 
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
+import { useI18n } from "@/i18n/I18nProvider";
 import { PROJECT_CATEGORIES, PROJECTS, type ProjectCategory } from "@/lib/projects";
 import { ProjectCard } from "./solutions/ProjectCard";
 
-type Filter = "All" | ProjectCategory;
+type Filter = "all" | ProjectCategory;
 
-const FILTERS: readonly Filter[] = ["All", ...PROJECT_CATEGORIES];
+const FILTERS: readonly Filter[] = ["all", ...PROJECT_CATEGORIES];
 
 export function Solutions() {
-  const [activeFilter, setActiveFilter] = useState<Filter>("All");
+  const { t } = useI18n();
+  const copy = t.solutions;
+  const [activeFilter, setActiveFilter] = useState<Filter>("all");
   const visibleProjects =
-    activeFilter === "All" ? PROJECTS : PROJECTS.filter((project) => project.category === activeFilter);
+    activeFilter === "all" ? PROJECTS : PROJECTS.filter((project) => project.category === activeFilter);
 
   return (
     <section id="solutions" aria-labelledby="solutions-heading" className="relative py-24 sm:py-32">
       <div className="container">
         <SectionHeading
           id="solutions-heading"
-          eyebrow="Solutions"
+          eyebrow={copy.eyebrow}
           title={
             <>
-              Built, shipped, and <span className="text-gradient">running in production</span>
+              {copy.titleStart}
+              <span className="text-gradient">{copy.titleHighlight}</span>
             </>
           }
-          description="A selection of custom applications, ready-to-use templates, and technical rescues we've delivered."
+          description={copy.description}
         />
 
         <Reveal delay={0.1} className="mt-12 flex justify-center">
@@ -63,8 +67,15 @@ type FilterTabsProps = {
 };
 
 function FilterTabs({ active, onChange }: FilterTabsProps) {
+  const { t } = useI18n();
+  const copy = t.solutions;
+
   return (
-    <div role="tablist" aria-label="Filter projects" className="glass inline-flex flex-wrap justify-center gap-1 rounded-full p-1">
+    <div
+      role="tablist"
+      aria-label={copy.filterLabel}
+      className="glass inline-flex flex-wrap justify-center gap-1 rounded-full p-1"
+    >
       {FILTERS.map((filter) => {
         const isActive = filter === active;
         return (
@@ -76,7 +87,7 @@ function FilterTabs({ active, onChange }: FilterTabsProps) {
             onClick={() => onChange(filter)}
             className={clsx(
               "focus-ring relative rounded-full px-4 py-2 text-sm font-medium transition-colors",
-              isActive ? "text-white" : "text-ink-200 hover:text-white",
+              isActive ? "text-on-brand" : "text-ink-200 hover:text-white",
             )}
           >
             {isActive && (
@@ -86,7 +97,7 @@ function FilterTabs({ active, onChange }: FilterTabsProps) {
                 transition={{ type: "spring", stiffness: 380, damping: 30 }}
               />
             )}
-            <span className="relative">{filter}</span>
+            <span className="relative">{filter === "all" ? copy.all : copy.categories[filter]}</span>
           </button>
         );
       })}

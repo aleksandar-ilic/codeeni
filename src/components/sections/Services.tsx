@@ -5,6 +5,7 @@ import { Check, CodeXml, LayoutTemplate, ServerCog, type LucideIcon } from "luci
 
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type Service = {
   icon: LucideIcon;
@@ -13,46 +14,31 @@ type Service = {
   highlights: string[];
 };
 
-const SERVICES: readonly Service[] = [
-  {
-    icon: CodeXml,
-    title: "Custom Web Development",
-    summary: "Full-stack applications built for scale, from first commit to millions of requests.",
-    highlights: ["React & Next.js frontends", "Type-safe APIs & services", "Performance-first by default"],
-  },
-  {
-    icon: LayoutTemplate,
-    title: "Software Templates",
-    summary: "Ready-to-deploy architectural foundations that accelerate your launch by weeks.",
-    highlights: ["Auth, billing & dashboards", "CI/CD pipelines included", "Documented & extensible"],
-  },
-  {
-    icon: ServerCog,
-    title: "Technical Problem Solving",
-    summary: "Resolving complex backend, database, or infrastructure bottlenecks with precision.",
-    highlights: ["Query & schema optimization", "Scaling & cost reduction", "Architecture audits"],
-  },
-];
+const SERVICE_ICONS: readonly LucideIcon[] = [CodeXml, LayoutTemplate, ServerCog];
 
 export function Services() {
+  const { t } = useI18n();
+  const copy = t.services;
+
   return (
     <section id="services" aria-labelledby="services-heading" className="relative py-24 sm:py-32">
       <div className="container">
         <SectionHeading
           id="services-heading"
-          eyebrow="Services"
+          eyebrow={copy.eyebrow}
           title={
             <>
-              Engineering that moves <span className="text-gradient">your business</span>
+              {copy.titleStart}
+              <span className="text-gradient">{copy.titleHighlight}</span>
             </>
           }
-          description="Whether you're starting from zero or untangling a legacy system, we bring senior-level engineering to every engagement."
+          description={copy.description}
         />
 
         <ul className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {SERVICES.map((service, index) => (
+          {copy.items.map((service, index) => (
             <Reveal key={service.title} as="li" delay={index * 0.1} className="h-full">
-              <ServiceCard service={service} />
+              <ServiceCard service={{ ...service, icon: SERVICE_ICONS[index] }} />
             </Reveal>
           ))}
         </ul>

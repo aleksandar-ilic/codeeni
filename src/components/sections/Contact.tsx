@@ -3,10 +3,14 @@ import { Clock, Mail } from "lucide-react";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { SocialLinks } from "@/components/ui/SocialLinks";
+import { getDictionary } from "@/i18n/server";
 import { SITE } from "@/lib/site";
 import { ContactForm } from "./contact/ContactForm";
 
-export function Contact() {
+export async function Contact() {
+  const t = await getDictionary();
+  const copy = t.contact;
+
   return (
     <section id="contact" aria-labelledby="contact-heading" className="relative py-24 sm:py-32">
       <div className="container grid gap-12 lg:grid-cols-[1fr_1.15fr] lg:gap-16">
@@ -14,23 +18,24 @@ export function Contact() {
           <SectionHeading
             id="contact-heading"
             align="left"
-            eyebrow="Contact"
+            eyebrow={copy.eyebrow}
             title={
               <>
-                Let&apos;s build <span className="text-gradient">together</span>
+                {copy.titleStart}
+                <span className="text-gradient">{copy.titleHighlight}</span>
               </>
             }
-            description="Tell us about your project. We'll respond with clear next steps, an honest assessment, and no sales fluff."
+            description={copy.description}
           />
 
           <Reveal delay={0.15} className="mt-10 space-y-5">
-            <ContactDetail icon={<Mail className="h-5 w-5 text-accent-300" />} label="Email us">
+            <ContactDetail icon={<Mail className="h-5 w-5 text-accent-300" />} label={copy.emailLabel}>
               <a href={`mailto:${SITE.email}`} className="focus-ring rounded text-white hover:text-accent-200">
                 {SITE.email}
               </a>
             </ContactDetail>
-            <ContactDetail icon={<Clock className="h-5 w-5 text-accent-300" />} label="Response time">
-              <span className="text-white">{SITE.responseTime}</span>
+            <ContactDetail icon={<Clock className="h-5 w-5 text-accent-300" />} label={copy.responseLabel}>
+              <span className="text-white">{t.site.responseTime}</span>
             </ContactDetail>
             <SocialLinks className="pt-3" />
           </Reveal>

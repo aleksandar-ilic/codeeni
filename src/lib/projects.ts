@@ -1,15 +1,23 @@
-export type ProjectCategory = "Web Apps" | "Templates" | "Problem Solving";
+export const PROJECT_CATEGORIES = ["webApps", "templates", "problemSolving"] as const;
+export type ProjectCategory = (typeof PROJECT_CATEGORIES)[number];
 
 export type ProjectPreviewVariant = "dashboard" | "storefront" | "terminal";
 
+export const PROJECT_SLUGS = [
+  "fleetpulse",
+  "launchkit",
+  "shopflow",
+  "ledgerTuning",
+  "storefrontKit",
+  "cloudMigration",
+] as const;
+export type ProjectSlug = (typeof PROJECT_SLUGS)[number];
+
+/** Language-independent project data; titles, summaries and metrics live in the dictionaries. */
 export type Project = {
-  slug: string;
-  title: string;
-  client: string;
+  slug: ProjectSlug;
   category: ProjectCategory;
-  summary: string;
   stack: string[];
-  metric: { value: string; label: string };
   preview: ProjectPreviewVariant;
   /** Tailwind gradient stops used for the card's preview glow. */
   accent: string;
@@ -18,51 +26,33 @@ export type Project = {
   terminalLines?: string[];
 };
 
-export const PROJECT_CATEGORIES: readonly ProjectCategory[] = ["Web Apps", "Templates", "Problem Solving"];
-
 // Sample content: replace with real projects, clients, and metrics before launch.
 export const PROJECTS: readonly Project[] = [
   {
     slug: "fleetpulse",
-    title: "FleetPulse",
-    client: "Logistics operator",
-    category: "Web Apps",
-    summary: "Real-time fleet tracking and dispatch dashboard replacing a patchwork of spreadsheets.",
+    category: "webApps",
     stack: ["Next.js", "PostgreSQL", "WebSockets"],
-    metric: { value: "40%", label: "faster dispatch" },
     preview: "dashboard",
     accent: "from-brand-500 to-cyan-400",
   },
   {
     slug: "launchkit",
-    title: "LaunchKit SaaS Starter",
-    client: "Codeeni template",
-    category: "Templates",
-    summary: "Production-ready SaaS foundation with auth, team accounts, Stripe billing, and an admin panel.",
+    category: "templates",
     stack: ["Next.js", "Prisma", "Stripe"],
-    metric: { value: "3 wks", label: "saved per launch" },
     preview: "dashboard",
     accent: "from-accent-500 to-fuchsia-400",
   },
   {
     slug: "shopflow",
-    title: "ShopFlow Commerce",
-    client: "Retail brand",
-    category: "Web Apps",
-    summary: "Headless storefront with lightning-fast product search and a streamlined one-page checkout.",
+    category: "webApps",
     stack: ["Next.js", "Shopify API", "Algolia"],
-    metric: { value: "2.1×", label: "conversion rate" },
     preview: "storefront",
     accent: "from-fuchsia-500 to-rose-400",
   },
   {
-    slug: "ledger-tuning",
-    title: "Ledger Query Tuning",
-    client: "Fintech platform",
-    category: "Problem Solving",
-    summary: "Rescued a slowing transaction ledger through index redesign and query restructuring.",
+    slug: "ledgerTuning",
+    category: "problemSolving",
     stack: ["PostgreSQL", "Redis", "Grafana"],
-    metric: { value: "15×", label: "faster reports" },
     preview: "terminal",
     accent: "from-emerald-500 to-brand-500",
     terminalLines: [
@@ -73,24 +63,16 @@ export const PROJECTS: readonly Project[] = [
     ],
   },
   {
-    slug: "storefront-kit",
-    title: "Storefront Kit",
-    client: "Codeeni template",
-    category: "Templates",
-    summary: "E-commerce starter with catalog, cart, payments, and CMS-driven pages ready to brand.",
+    slug: "storefrontKit",
+    category: "templates",
     stack: ["Next.js", "Sanity", "Stripe"],
-    metric: { value: "< 1s", label: "page loads" },
     preview: "storefront",
     accent: "from-brand-500 to-accent-500",
   },
   {
-    slug: "cloud-migration",
-    title: "Cloud Cost Overhaul",
-    client: "B2B SaaS company",
-    category: "Problem Solving",
-    summary: "Containerized a legacy monolith and right-sized infrastructure without a single outage.",
+    slug: "cloudMigration",
+    category: "problemSolving",
     stack: ["Docker", "Kubernetes", "Terraform"],
-    metric: { value: "−38%", label: "monthly cloud bill" },
     preview: "terminal",
     accent: "from-amber-400 to-accent-500",
     terminalLines: [

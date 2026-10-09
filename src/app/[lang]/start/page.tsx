@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 
 import { ProjectBriefForm } from "@/components/brief/ProjectBriefForm";
 import { Navbar } from "@/components/layout/Navbar";
+import { getDictionary } from "@/i18n/server";
 
-export const metadata: Metadata = {
-  title: "Start a Project — Codeeni",
-  description: "Tell us about your business and what you need. Four short steps, no obligation.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.meta.startTitle, description: t.meta.startDescription };
+}
 
 export default function StartProjectPage() {
   return (

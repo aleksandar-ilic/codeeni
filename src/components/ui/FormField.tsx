@@ -5,23 +5,13 @@ type FormFieldProps = {
   label: string;
   error?: string;
   multiline?: boolean;
-  optional?: boolean;
   icon?: React.ReactNode;
 } & Omit<React.InputHTMLAttributes<HTMLInputElement> & React.TextareaHTMLAttributes<HTMLTextAreaElement>, "id">;
 
 const CONTROL_STYLES =
   "w-full rounded-xl border bg-ink-900/60 px-4 py-3 text-sm text-white placeholder:text-ink-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-400/60";
 
-export function FormField({
-  id,
-  label,
-  error,
-  multiline = false,
-  optional = false,
-  icon,
-  className,
-  ...controlProps
-}: FormFieldProps) {
+export function FormField({ id, label, error, multiline = false, icon, className, ...controlProps }: FormFieldProps) {
   const errorId = `${id}-error`;
   const sharedProps = {
     id,
@@ -30,7 +20,7 @@ export function FormField({
     "aria-describedby": error ? errorId : undefined,
     className: clsx(
       CONTROL_STYLES,
-      error ? "border-rose-400/60" : "border-white/10 hover:border-white/20 focus:border-accent-400/50",
+      error ? "border-danger/60" : "border-white/10 hover:border-white/20 focus:border-accent-400/50",
       className,
     ),
   };
@@ -40,7 +30,6 @@ export function FormField({
       <label htmlFor={id} className="mb-2 flex items-center gap-2 text-sm font-medium text-ink-100">
         {icon}
         {label}
-        {optional && <span className="font-normal text-ink-400">(optional)</span>}
       </label>
       {multiline ? (
         <textarea rows={5} {...controlProps} {...sharedProps} />
@@ -48,7 +37,7 @@ export function FormField({
         <input {...controlProps} {...sharedProps} />
       )}
       {error && (
-        <p id={errorId} className="mt-2 text-xs text-rose-300">
+        <p id={errorId} className="mt-2 text-xs text-danger">
           {error}
         </p>
       )}

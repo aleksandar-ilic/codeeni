@@ -16,18 +16,22 @@ import {
   MapPin,
   Send,
   ShieldCheck,
+  type LucideIcon,
 } from "lucide-react";
 import clsx from "clsx";
 
 import { submitProjectBrief, type ProjectBriefState } from "@/app/actions/project-brief";
 import { ButtonLink } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
+import { format } from "@/i18n/config";
+import { useI18n } from "@/i18n/I18nProvider";
 import {
   BRIEF_FIELDS,
   BRIEF_STEPS,
   EMPTY_BRIEF,
   MAX_DESCRIPTION_LENGTH,
   MAX_FIELD_LENGTH,
+  MIN_DESCRIPTION_LENGTH,
   PROJECT_TYPES,
   TIMELINES,
   validateBriefStep,
@@ -35,55 +39,18 @@ import {
   type BriefField,
   type BriefValues,
 } from "@/lib/project-brief";
-import { SITE } from "@/lib/site";
 
 const INITIAL_STATE: ProjectBriefState = { status: "idle" };
 const TOTAL_STEPS = BRIEF_STEPS.length;
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-const STEPS = [
-  {
-    label: "About you",
-    hint: "Name and business",
-    title: "Tell us who you are",
-    description: "Whether you run a local shop or a growing company, it all starts with a quick hello.",
-  },
-  {
-    label: "Your project",
-    hint: "What you need",
-    title: "What can we build for you?",
-    description: "A rough idea is enough. We'll shape the details together.",
-  },
-  {
-    label: "References",
-    hint: "Optional links",
-    title: "Anything we should look at?",
-    description: "Everything here is optional. The more you share, the more tailored our proposal.",
-  },
-  {
-    label: "Contact",
-    hint: "How to reach you",
-    title: "How can we reach you?",
-    description: "Leave a phone number, an email, or both. Whatever suits you best.",
-  },
-] as const;
-
-const ASSURANCES = [
-  { icon: Clock, text: `Reply ${SITE.responseTime.toLowerCase()}` },
-  { icon: ShieldCheck, text: "Fixed price, agreed up front" },
-  { icon: Handshake, text: "Free estimate, no obligation" },
-] as const;
+const ASSURANCE_ICONS: readonly LucideIcon[] = [Clock, ShieldCheck, Handshake];
 
 const REFERENCE_FIELDS = [
-  { field: "website", label: "Current website", icon: Globe, placeholder: "yourbusiness.com" },
-  { field: "social", label: "Instagram or Facebook", icon: AtSign, placeholder: "@yourbusiness" },
-  { field: "location", label: "Google Maps location", icon: MapPin, placeholder: "Link or address" },
-  {
-    field: "links",
-    label: "Designs, documents or sites you like",
-    icon: Link2,
-    placeholder: "Figma, Google Drive, example websites…",
-  },
+  { field: "website", icon: Globe },
+  { field: "social", icon: AtSign },
+  { field: "location", icon: MapPin },
+  { field: "links", icon: Link2 },
 ] as const;
 
 const slide: Variants = {
@@ -93,6 +60,8 @@ const slide: Variants = {
 };
 
 export function ProjectBriefForm() {
+  const { t, href } = useI18n();
+  const copy = t.brief;
   const [state, submit, isPending] = useActionState(submitProjectBrief, INITIAL_STATE);
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
@@ -110,10 +79,20 @@ export function ProjectBriefForm() {
     }
   }, [state]);
 
-  if (state.status === "success") return <SuccessMessage name={values.name.trim()} />;
+  if (state.status === "success") {
+    const name = values.name.trim();
+    return (
+      <SuccessMessage
+        title={name ? format(copy.success.title, { name }) : copy.success.titleNoName}
+        body={copy.success.body}
+        backLabel={copy.success.back}
+        backHref={href("/")}
+      />
+    );
+  }
 
   const isLastStep = step === TOTAL_STEPS - 1;
-  const current = STEPS[step];
+  const current = copy.steps[step];
 
   const goTo = (nextStep: number) => {
     setDirection(nextStep > step ? 1 : -1);
@@ -130,10 +109,17 @@ export function ProjectBriefForm() {
     });
   };
 
-  const bind = (field: BriefField) => ({
+  const errorFor = (field: BriefField) => {
+    const code = errors[field];
+    return code ? format(copy.errors[code], { min: MIN_DESCRIPTION_LENGTH }) : undefined;
+  };
+
+  const bind = (field: Exclude<BriefField, "projectType" | "timeline">) => ({
     id: field,
     value: values[field],
-    error: errors[field],
+    error: errorFor(field),
+    label: copy.fields[field].label,
+    placeholder: copy.fields[field].placeholder,
     onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => update(field, event.target.value),
   });
 
@@ -161,56 +147,40 @@ export function ProjectBriefForm() {
   return (
     <div className="mx-auto grid w-full max-w-5xl items-start gap-8 lg:grid-cols-[280px_1fr] lg:gap-14">
       <aside>
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent-300">Project brief</p>
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent-300">{copy.eyebrow}</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-          Start your <span className="text-gradient">project</span>
+          {copy.titleStart}
+          <span className="text-gradient">{copy.titleHighlight}</span>
         </h1>
-        <p className="mt-3 text-sm leading-relaxed text-ink-200">Four short steps, about two minutes.</p>
+        <p className="mt-3 text-sm leading-relaxed text-ink-200">{copy.intro}</p>
 
         <StepList current={step} onSelect={goTo} />
         <MobileStepper current={step} />
 
         <ul className="mt-10 hidden space-y-3 border-t border-white/10 pt-8 lg:block">
-          {ASSURANCES.map(({ icon: Icon, text }) => (
-            <li key={text} className="flex items-center gap-3 text-sm text-ink-200">
-              <Icon className="h-4 w-4 shrink-0 text-accent-300" />
-              {text}
-            </li>
-          ))}
+          {copy.assurances.map((text, index) => {
+            const Icon = ASSURANCE_ICONS[index];
+            return (
+              <li key={text} className="flex items-center gap-3 text-sm text-ink-200">
+                <Icon className="h-4 w-4 shrink-0 text-accent-300" />
+                {text}
+              </li>
+            );
+          })}
         </ul>
       </aside>
 
       <form onSubmit={handleSubmit} noValidate className="glass rounded-3xl p-6 sm:p-10">
         <AnimatePresence mode="wait" custom={direction} initial={false}>
-          <motion.div
-            key={step}
-            custom={direction}
-            variants={slide}
-            initial="enter"
-            animate="center"
-            exit="exit"
-          >
+          <motion.div key={step} custom={direction} variants={slide} initial="enter" animate="center" exit="exit">
             <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">{current.title}</h2>
             <p className="mt-2 leading-relaxed text-ink-200">{current.description}</p>
 
             <div className="mt-8 space-y-6">
               {step === 0 && (
                 <div className="grid gap-6 sm:grid-cols-2">
-                  <FormField
-                    {...bind("name")}
-                    label="Your name"
-                    autoComplete="name"
-                    placeholder="Jane Smith"
-                    maxLength={MAX_FIELD_LENGTH}
-                    autoFocus
-                  />
-                  <FormField
-                    {...bind("business")}
-                    label="Business or company"
-                    autoComplete="organization"
-                    placeholder="e.g. dental clinic, SaaS startup"
-                    maxLength={MAX_FIELD_LENGTH}
-                  />
+                  <FormField {...bind("name")} autoComplete="name" maxLength={MAX_FIELD_LENGTH} autoFocus />
+                  <FormField {...bind("business")} autoComplete="organization" maxLength={MAX_FIELD_LENGTH} />
                 </div>
               )}
 
@@ -218,41 +188,32 @@ export function ProjectBriefForm() {
                 <>
                   <ChoiceGroup
                     name="projectType"
-                    label="Type of project"
-                    options={PROJECT_TYPES}
+                    label={copy.fields.projectType}
+                    options={PROJECT_TYPES.map((value) => ({ value, label: copy.projectTypes[value] }))}
                     value={values.projectType}
-                    error={errors.projectType}
+                    error={errorFor("projectType")}
                     onChange={(value) => update("projectType", value)}
                   />
-                  <FormField
-                    {...bind("description")}
-                    label="Describe what you need"
-                    multiline
-                    rows={4}
-                    placeholder="e.g. A website for my salon with services, prices and online booking…"
-                    maxLength={MAX_DESCRIPTION_LENGTH}
-                  />
+                  <FormField {...bind("description")} multiline rows={4} maxLength={MAX_DESCRIPTION_LENGTH} />
                   <ChoiceGroup
                     name="timeline"
-                    label="When would you like to start?"
-                    optional
-                    options={TIMELINES}
+                    label={copy.fields.timeline}
+                    optionalLabel={copy.optional}
+                    options={TIMELINES.map((value) => ({ value, label: copy.timelines[value] }))}
                     value={values.timeline}
-                    error={errors.timeline}
+                    error={errorFor("timeline")}
                     onChange={(value) => update("timeline", value)}
                   />
                 </>
               )}
 
               {step === 2 && (
-                <div className="grid gap-x-6 gap-y-6 sm:grid-cols-2">
-                  {REFERENCE_FIELDS.map(({ field, label, icon: Icon, placeholder }, index) => (
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {REFERENCE_FIELDS.map(({ field, icon: Icon }, index) => (
                     <FormField
                       key={field}
                       {...bind(field)}
-                      label={label}
                       icon={<Icon className="h-4 w-4 text-accent-300" />}
-                      placeholder={placeholder}
                       maxLength={MAX_FIELD_LENGTH}
                       autoFocus={index === 0}
                     />
@@ -262,23 +223,8 @@ export function ProjectBriefForm() {
 
               {step === 3 && (
                 <div className="grid gap-6 sm:grid-cols-2">
-                  <FormField
-                    {...bind("phone")}
-                    label="Phone number"
-                    type="tel"
-                    autoComplete="tel"
-                    placeholder="+381 65 123 4567"
-                    maxLength={MAX_FIELD_LENGTH}
-                    autoFocus
-                  />
-                  <FormField
-                    {...bind("email")}
-                    label="Email"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="you@business.com"
-                    maxLength={MAX_FIELD_LENGTH}
-                  />
+                  <FormField {...bind("phone")} type="tel" autoComplete="tel" maxLength={MAX_FIELD_LENGTH} autoFocus />
+                  <FormField {...bind("email")} type="email" autoComplete="email" maxLength={MAX_FIELD_LENGTH} />
                 </div>
               )}
             </div>
@@ -293,7 +239,7 @@ export function ProjectBriefForm() {
               className="focus-ring inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-ink-300 transition-colors hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back
+              {copy.back}
             </button>
           ) : (
             <span />
@@ -302,29 +248,29 @@ export function ProjectBriefForm() {
           <button
             type="submit"
             disabled={isPending}
-            className="focus-ring group inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-brand-gradient px-6 font-medium text-white shadow-glow transition-all duration-300 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
+            className="focus-ring group inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-brand-gradient px-6 font-medium text-on-brand shadow-glow transition-all duration-300 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isPending ? (
               <>
                 <LoaderCircle className="h-4 w-4 animate-spin" />
-                Sending…
+                {copy.sending}
               </>
             ) : isLastStep ? (
               <>
-                Send brief
+                {copy.send}
                 <Send className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </>
             ) : (
               <>
-                Continue
+                {copy.next}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </>
             )}
           </button>
         </div>
 
-        <p aria-live="polite" className="mt-4 min-h-[1.25rem] text-right text-sm text-rose-300">
-          {state.status === "error" ? state.message : null}
+        <p aria-live="polite" className="mt-4 min-h-[1.25rem] text-right text-sm text-danger">
+          {state.status === "error" ? copy.reviewAnswers : null}
         </p>
       </form>
     </div>
@@ -332,9 +278,11 @@ export function ProjectBriefForm() {
 }
 
 function StepList({ current, onSelect }: { current: number; onSelect: (step: number) => void }) {
+  const { t } = useI18n();
+
   return (
     <ol className="mt-10 hidden lg:block">
-      {STEPS.map(({ label, hint }, index) => {
+      {t.brief.steps.map(({ label, hint }, index) => {
         const isDone = index < current;
         const isCurrent = index === current;
 
@@ -350,7 +298,7 @@ function StepList({ current, onSelect }: { current: number; onSelect: (step: num
               <span
                 className={clsx(
                   "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border font-mono text-sm transition-all duration-300",
-                  isDone && "border-transparent bg-brand-gradient text-white",
+                  isDone && "border-transparent bg-brand-gradient text-on-brand",
                   isCurrent && "border-accent-400 bg-accent-500/15 text-white ring-4 ring-accent-500/15",
                   !isDone && !isCurrent && "border-white/10 text-ink-400",
                 )}
@@ -386,10 +334,13 @@ function StepList({ current, onSelect }: { current: number; onSelect: (step: num
 }
 
 function MobileStepper({ current }: { current: number }) {
+  const { t } = useI18n();
+  const steps = t.brief.steps;
+
   return (
     <div className="mt-6 lg:hidden">
       <div className="flex gap-1.5" aria-hidden>
-        {STEPS.map(({ label }, index) => (
+        {steps.map(({ label }, index) => (
           <span
             key={label}
             className={clsx(
@@ -403,7 +354,7 @@ function MobileStepper({ current }: { current: number }) {
         <span className="font-mono text-accent-300">
           {current + 1}/{TOTAL_STEPS}
         </span>{" "}
-        {STEPS[current].label}
+        {steps[current].label}
       </p>
     </div>
   );
@@ -412,33 +363,33 @@ function MobileStepper({ current }: { current: number }) {
 type ChoiceGroupProps = {
   name: BriefField;
   label: string;
-  options: readonly string[];
+  options: { value: string; label: string }[];
   value: string;
   error?: string;
-  optional?: boolean;
+  optionalLabel?: string;
   onChange: (value: string) => void;
 };
 
-function ChoiceGroup({ name, label, options, value, error, optional = false, onChange }: ChoiceGroupProps) {
+function ChoiceGroup({ name, label, options, value, error, optionalLabel, onChange }: ChoiceGroupProps) {
   const errorId = `${name}-error`;
 
   return (
     <fieldset aria-describedby={error ? errorId : undefined}>
       <legend className="mb-3 text-sm font-medium text-ink-100">
-        {label} {optional && <span className="font-normal text-ink-400">(optional)</span>}
+        {label} {optionalLabel && <span className="font-normal text-ink-400">{optionalLabel}</span>}
       </legend>
       <div className="flex flex-wrap gap-2">
         {options.map((option, index) => {
-          const isSelected = value === option;
+          const isSelected = value === option.value;
           return (
-            <label key={option} className="cursor-pointer">
+            <label key={option.value} className="cursor-pointer">
               <input
                 type="radio"
                 id={index === 0 ? name : undefined}
                 name={name}
-                value={option}
+                value={option.value}
                 checked={isSelected}
-                onChange={() => onChange(option)}
+                onChange={() => onChange(option.value)}
                 className="peer sr-only"
               />
               <span
@@ -447,18 +398,18 @@ function ChoiceGroup({ name, label, options, value, error, optional = false, onC
                   isSelected
                     ? "border-accent-400/80 bg-accent-500/25 text-white"
                     : error
-                      ? "border-rose-400/40 bg-white/[0.03] text-ink-200 hover:text-white"
+                      ? "border-danger/40 bg-white/[0.03] text-ink-200 hover:text-white"
                       : "border-white/10 bg-white/[0.03] text-ink-200 hover:border-white/20 hover:text-white",
                 )}
               >
-                {option}
+                {option.label}
               </span>
             </label>
           );
         })}
       </div>
       {error && (
-        <p id={errorId} className="mt-2 text-xs text-rose-300">
+        <p id={errorId} className="mt-2 text-xs text-danger">
           {error}
         </p>
       )}
@@ -466,7 +417,9 @@ function ChoiceGroup({ name, label, options, value, error, optional = false, onC
   );
 }
 
-function SuccessMessage({ name }: { name: string }) {
+type SuccessMessageProps = { title: string; body: string; backLabel: string; backHref: string };
+
+function SuccessMessage({ title, body, backLabel, backHref }: SuccessMessageProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -474,17 +427,13 @@ function SuccessMessage({ name }: { name: string }) {
       transition={{ duration: 0.5, ease: EASE }}
       className="glass mx-auto max-w-xl rounded-3xl p-10 text-center"
     >
-      <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-400/10">
-        <CircleCheck className="h-8 w-8 text-emerald-300" />
+      <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
+        <CircleCheck className="h-8 w-8 text-success" />
       </span>
-      <h1 className="mt-6 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-        Thanks{name ? `, ${name}` : ""}!
-      </h1>
-      <p className="mt-4 leading-relaxed text-ink-200">
-        We&apos;ve got your brief and will get back to you {SITE.responseTime.toLowerCase()}.
-      </p>
-      <ButtonLink href="/" variant="secondary" size="lg" className="mt-10">
-        Back to homepage
+      <h1 className="mt-6 text-3xl font-semibold tracking-tight text-white sm:text-4xl">{title}</h1>
+      <p className="mt-4 leading-relaxed text-ink-200">{body}</p>
+      <ButtonLink href={backHref} variant="secondary" size="lg" className="mt-10">
+        {backLabel}
       </ButtonLink>
     </motion.div>
   );

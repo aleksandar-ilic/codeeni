@@ -5,6 +5,7 @@ import { Compass, Cpu, Rocket, type LucideIcon } from "lucide-react";
 
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type Step = {
   icon: LucideIcon;
@@ -13,31 +14,12 @@ type Step = {
   deliverables: string[];
 };
 
-const STEPS: readonly Step[] = [
-  {
-    icon: Compass,
-    title: "Architecture & Strategy",
-    description:
-      "We map your goals to a technical blueprint: the right stack, data model, and infrastructure before a single line ships.",
-    deliverables: ["Technical roadmap", "System design"],
-  },
-  {
-    icon: Cpu,
-    title: "Precision Engineering",
-    description:
-      "Iterative, test-driven development with weekly demos, so you see real progress and steer with confidence.",
-    deliverables: ["Weekly demos", "Automated tests"],
-  },
-  {
-    icon: Rocket,
-    title: "Seamless Deployment",
-    description:
-      "Zero-downtime releases, monitoring, and a clean handover. Your product goes live and stays fast.",
-    deliverables: ["CI/CD & monitoring", "Docs & handover"],
-  },
-];
+const STEP_ICONS: readonly LucideIcon[] = [Compass, Cpu, Rocket];
 
 export function Process() {
+  const { t } = useI18n();
+  const copy = t.process;
+
   return (
     <section id="process" aria-labelledby="process-heading" className="relative overflow-hidden py-24 sm:py-32">
       <div
@@ -48,22 +30,24 @@ export function Process() {
       <div className="container">
         <SectionHeading
           id="process-heading"
-          eyebrow="How we work"
+          eyebrow={copy.eyebrow}
           title={
             <>
-              The <span className="text-gradient">Effortless Execution</span> process
+              {copy.titleStart}
+              <span className="text-gradient">{copy.titleHighlight}</span>
+              {copy.titleEnd}
             </>
           }
-          description="A clear, three-phase path from idea to production, with no surprises along the way."
+          description={copy.description}
         />
 
         <div className="relative mt-16 lg:mt-20">
           <TimelineLine />
 
           <ol className="grid gap-10 lg:grid-cols-3 lg:gap-8">
-            {STEPS.map((step, index) => (
+            {copy.steps.map((step, index) => (
               <Reveal key={step.title} as="li" delay={index * 0.15} className="relative h-full pl-16 lg:pl-0">
-                <StepCard step={step} stepNumber={index + 1} />
+                <StepCard step={{ ...step, icon: STEP_ICONS[index] }} stepNumber={index + 1} stepLabel={copy.stepLabel} />
               </Reveal>
             ))}
           </ol>
@@ -96,7 +80,7 @@ function TimelineLine() {
   );
 }
 
-function StepCard({ step, stepNumber }: { step: Step; stepNumber: number }) {
+function StepCard({ step, stepNumber, stepLabel }: { step: Step; stepNumber: number; stepLabel: string }) {
   const { icon: Icon, title, description, deliverables } = step;
   const label = String(stepNumber).padStart(2, "0");
 
@@ -104,12 +88,14 @@ function StepCard({ step, stepNumber }: { step: Step; stepNumber: number }) {
     <article className="flex h-full flex-col lg:items-center lg:text-center">
       <span className="absolute left-0 top-0 flex h-12 w-12 items-center justify-center rounded-full bg-ink-950 ring-1 ring-accent-400/40 shadow-glow lg:relative">
         <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-gradient">
-          <Icon className="h-5 w-5 text-white" />
+          <Icon className="h-5 w-5 text-on-brand" />
         </span>
       </span>
 
       <div className="glass flex-1 rounded-2xl p-6 lg:mt-8 lg:w-full">
-        <p className="font-mono text-xs tracking-widest text-accent-300">STEP {label}</p>
+        <p className="font-mono text-xs uppercase tracking-widest text-accent-300">
+          {stepLabel} {label}
+        </p>
         <h3 className="mt-2 text-xl font-semibold text-white">{title}</h3>
         <p className="mt-3 leading-relaxed text-ink-200">{description}</p>
 

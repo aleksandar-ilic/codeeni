@@ -4,7 +4,8 @@ import { motion, type Variants } from "framer-motion";
 import { ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/Button";
-import { START_PROJECT_HREF } from "@/lib/navigation";
+import { useI18n } from "@/i18n/I18nProvider";
+import { START_PROJECT_PATH } from "@/lib/navigation";
 import { HeroVisual } from "./hero/HeroVisual";
 
 const container: Variants = {
@@ -18,6 +19,9 @@ const item: Variants = {
 };
 
 export function Hero() {
+  const { t, href } = useI18n();
+  const { guarantee } = t.hero;
+
   return (
     <section
       id="top"
@@ -33,7 +37,7 @@ export function Hero() {
             className="glass inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium text-ink-100 sm:text-sm"
           >
             <Sparkles className="h-3.5 w-3.5 text-accent-300" />
-            Where Logic Meets Effortless Execution.
+            {t.hero.badge}
           </motion.p>
 
           <motion.h1
@@ -41,35 +45,38 @@ export function Hero() {
             variants={item}
             className="mt-6 text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl"
           >
-            Elegant Software Solutions for <span className="text-gradient">Complex Problems.</span>
+            {t.hero.titleStart}
+            <span className="text-gradient">{t.hero.titleHighlight}</span>
           </motion.h1>
 
           <motion.p variants={item} className="mt-6 text-base leading-relaxed text-ink-200 sm:text-lg">
-            We build custom web applications, scalable architecture, and ready-to-use software
-            templates that drive your business forward.
+            {t.hero.subtitle}
           </motion.p>
 
           <motion.div variants={item} className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <ButtonLink href={START_PROJECT_HREF} size="lg">
-              Let&apos;s Build Together
+            <ButtonLink href={href(START_PROJECT_PATH)} size="lg">
+              {t.hero.primaryCta}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </ButtonLink>
             <ButtonLink href="#solutions" variant="secondary" size="lg">
-              Explore Our Solutions
+              {t.hero.secondaryCta}
             </ButtonLink>
           </motion.div>
 
           <motion.aside
             variants={item}
-            aria-label="Our guarantee"
+            aria-label={guarantee.aria}
             className="glass mt-10 inline-flex items-center gap-4 rounded-2xl px-5 py-4"
           >
             <ShieldCheck className="h-7 w-7 shrink-0 text-accent-300" strokeWidth={1.75} />
             <div>
-              <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-accent-300">Guarantee</p>
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-accent-300">
+                {guarantee.label}
+              </p>
               <p className="mt-1 text-sm text-ink-200 sm:text-base">
-                A <strong className="font-semibold text-white">fixed price</strong>, agreed before we write a line of
-                code. No surprises on the invoice.
+                {guarantee.before}
+                <strong className="font-semibold text-white">{guarantee.highlight}</strong>
+                {guarantee.after}
               </p>
             </div>
           </motion.aside>

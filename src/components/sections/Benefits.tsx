@@ -2,115 +2,36 @@ import { TrendingUp, Zap, type LucideIcon } from "lucide-react";
 
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import type { Dictionary, Segment } from "@/i18n/dictionaries";
+import { getDictionary } from "@/i18n/server";
 
-/** Plain strings render as body text; `{ em }` segments are highlighted. */
-type Segment = string | { em: string };
+type BenefitGroup = Dictionary["benefits"]["groups"][number];
+type Benefit = BenefitGroup["items"][number];
 
-type Benefit = {
-  title: string;
-  body: Segment[];
-};
+const GROUP_ICONS: readonly LucideIcon[] = [TrendingUp, Zap];
 
-type BenefitGroup = {
-  icon: LucideIcon;
-  title: string;
-  benefits: Benefit[];
-};
+export async function Benefits() {
+  const { benefits: copy } = await getDictionary();
 
-const BENEFIT_GROUPS: readonly BenefitGroup[] = [
-  {
-    icon: TrendingUp,
-    title: "Grows your revenue",
-    benefits: [
-      {
-        title: "Found on Google and in AI search",
-        body: [
-          "Fast, well-structured sites rank higher and become ",
-          { em: "the sources ChatGPT and Perplexity cite" },
-          " when someone asks for a recommendation.",
-        ],
-      },
-      {
-        title: "Speed that converts",
-        body: [
-          "Every extra second of load time costs sales. We build for sub-second pages, so ",
-          { em: "more visitors become customers" },
-          ".",
-        ],
-      },
-      {
-        title: "Launch weeks earlier",
-        body: [
-          "Our templates give you auth, billing, and dashboards on day one, so you ",
-          { em: "start selling sooner" },
-          ".",
-        ],
-      },
-      {
-        title: "Scales without a rewrite",
-        body: [
-          "Architecture planned for growth means your product handles ",
-          { em: "10× the users without starting over" },
-          ".",
-        ],
-      },
-    ],
-  },
-  {
-    icon: Zap,
-    title: "Saves time and money",
-    benefits: [
-      {
-        title: "Automate the busywork",
-        body: [
-          "Invoices, reports, onboarding emails, data entry: if your team repeats it, ",
-          { em: "software can do it" },
-          ".",
-        ],
-      },
-      {
-        title: "One dashboard, not ten spreadsheets",
-        body: ["Live data in one place, so decisions take ", { em: "minutes instead of meetings" }, "."],
-      },
-      {
-        title: "Lower infrastructure bills",
-        body: [
-          "Right-sized cloud setups and efficient queries mean you ",
-          { em: "stop paying for capacity you don't use" },
-          ".",
-        ],
-      },
-      {
-        title: "Fewer 3 a.m. emergencies",
-        body: [
-          "Automated tests, monitoring, and clean deployments let your team ",
-          { em: "build features instead of fighting fires" },
-          ".",
-        ],
-      },
-    ],
-  },
-];
-
-export function Benefits() {
   return (
     <section id="benefits" aria-labelledby="benefits-heading" className="relative py-24 sm:py-32">
       <div className="container">
         <SectionHeading
           id="benefits-heading"
           align="left"
-          eyebrow="Why it matters"
+          eyebrow={copy.eyebrow}
           title={
             <>
-              What great software <span className="text-gradient">actually does for you</span>
+              {copy.titleStart}
+              <span className="text-gradient">{copy.titleHighlight}</span>
             </>
           }
         />
 
         <div className="mt-14 grid items-start gap-6 lg:grid-cols-2">
-          {BENEFIT_GROUPS.map((group, index) => (
+          {copy.groups.map((group, index) => (
             <Reveal key={group.title} delay={index * 0.12}>
-              <BenefitCard group={group} />
+              <BenefitCard group={group} icon={GROUP_ICONS[index]} />
             </Reveal>
           ))}
         </div>
@@ -119,20 +40,18 @@ export function Benefits() {
   );
 }
 
-function BenefitCard({ group }: { group: BenefitGroup }) {
-  const { icon: Icon, title, benefits } = group;
-
+function BenefitCard({ group, icon: Icon }: { group: BenefitGroup; icon: LucideIcon }) {
   return (
     <article className="glass rounded-2xl p-6 sm:p-8">
       <header className="flex items-center gap-4 border-b border-white/10 pb-6">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-gradient-soft ring-1 ring-white/10">
           <Icon className="h-5 w-5 text-accent-300" />
         </span>
-        <h3 className="text-xl font-semibold text-white sm:text-2xl">{title}</h3>
+        <h3 className="text-xl font-semibold text-white sm:text-2xl">{group.title}</h3>
       </header>
 
       <ol className="divide-y divide-white/10">
-        {benefits.map((benefit, index) => (
+        {group.items.map((benefit, index) => (
           <BenefitItem key={benefit.title} benefit={benefit} number={index + 1} />
         ))}
       </ol>
@@ -147,7 +66,7 @@ function BenefitItem({ benefit, number }: { benefit: Benefit; number: number }) 
       <div>
         <h4 className="font-semibold text-white">{benefit.title}</h4>
         <p className="mt-2 text-sm leading-relaxed text-ink-200">
-          {benefit.body.map((segment, index) =>
+          {benefit.body.map((segment: Segment, index) =>
             typeof segment === "string" ? (
               segment
             ) : (
